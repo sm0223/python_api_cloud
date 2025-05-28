@@ -1,12 +1,9 @@
 import functions_framework
 from flask import Flask, request, jsonify
-import json
 import logging
-import xsdata
 from xsdata.formats.dataclass.parsers import XmlParser, JsonParser
 import dataclasses
 import traceback
-import requests
 
 from mpp import Mpp
 from rules import runRule

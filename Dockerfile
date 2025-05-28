@@ -1,5 +1,5 @@
 # Use the official Python 3.10 slim image
-FROM python:3.10-slim
+FROM python:3.10
 
 # Set environment variables
 ENV PYTHONBUFFERED=1
@@ -18,7 +18,8 @@ COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    pip list  # This will show installed packages for debugging
 
 # Copy the application code
 COPY . .
