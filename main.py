@@ -3,8 +3,13 @@ from flask import Flask, request, jsonify
 import json
 import logging
 import xsdata
-from xsdata.formats.dataclass.parsers import XmlParser
+from xsdata.formats.dataclass.parsers import XmlParser, JsonParser
+import dataclasses
+import traceback
+import requests
+
 from mpp import Mpp
+from rules import runRule
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -25,9 +30,6 @@ def hello():
         'endpoints': {
             'GET /': 'This endpoint',
             'POST /bre033': 'Mortgage Pricing',
-            'POST /bre034': 'Mortgage Processing',
-            'PUT /bre/addFunction': 'Add new Function',
-            'DELETE /bre/deleteFunction': 'Delete Function'
         }
     })
 
@@ -36,79 +38,32 @@ def hello():
 def bre033():
     """POST endpoint to create a new item"""
     try:
-        parser = XmlParser()
-    
-        mpp_ob = {}
-        # Get JSON data from request
-        if not request.is_json:
-            mpp_ob = parser.from_string(request.data, Mpp)
-        else :            
-            mpp_ob = request.get_json()
+        logger.info(type(request.data))
         
-        logger.info(mpp_ob)
-        logger.info(type(mpp_ob))
-        logger.info(mpp_ob['Mpp'])
 
-        logger.info(mpp_ob['Mpp']['Application'])
-        logger.info(mpp_ob['Mpp']['Application']['Array_of_Applicant'])
-        logger.info(mpp_ob['Mpp']['Application']['Array_of_Applicant'][0]['Applicant']['Name'])
+        #----------------------------------------PARSE REQUEST-------------------------------------
+        parser = JsonParser()
+        if not request.is_json:
+            mpp = parser.from_string(request.data.decode("utf-8"), Mpp)
+        else :            
+            mpp = parser.from_string(request.data.decode("utf-8"), Mpp)
 
-        # TODO: CALL THE RESPECTIVE BRE 
+        # ----------------------------------------RUN RULES----------------------------------------
+        mpp.result = runRule(mpp)     
+        # ----------------------------------------CALL DIFFERENT SERVICE---------------------------
+        # TODO: CALL TEST2
 
-
-
+        # ----------------------------------------RETURN RESPONSE----------------------------------
         return jsonify({
             'status': 'success',
             'message': 'Item created successfully',
-            'data': json.dumps(mpp),
+            'data': dataclasses.asdict(mpp)
         }), 201
         
     except Exception as e:
         logger.error(f"Error creating item: {str(e)}")
+        traceback.print_exc()
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
-
-
-@app.route('/bre034', methods=['POST'])
-def bre034():
-    """POST endpoint to create a new item"""
-    try:
-        data = ""
-        # Get JSON data from request
-        if not request.is_json:
-            return jsonify({
-                'status': 'error',
-                'message': 'Request must be JSON'
-            }), 400
-        else :            
-            data = request.get_json()
-        
-        # Validate required fields
-        if not data or 'name' not in data:
-            return jsonify({
-                'status': 'error',
-                'message': 'Name field is required',
-                'data':data
-            }), 400
-        data.name = "afadsf";
-
-
-
-        # TODO: CALL THE RESPECTIVE BRE
-        logger.info(f"BRE PROCESSING DONE")
-        
-        return jsonify({
-            'status': 'success',
-            'message': 'Item created successfully',
-            'data': data
-        }), 201
-        
-    except Exception as e:
-        logger.error(f"Error creating item: {str(e)}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-
 
 # Error handlers
 @app.errorhandler(404)

@@ -1,0 +1,3 @@
+Flask==2.3.3
+functions-framework==3.4.0
+xsdata==24.4

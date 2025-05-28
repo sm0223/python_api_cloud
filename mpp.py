@@ -1,35 +1,98 @@
 from dataclasses import dataclass, field
 from typing import Optional
-from xsdata.formats.dataclass.parsers import XmlParser, JsonParser
-from generated.mpp import (
-    Mpp,
-)
-import json
-data = """
-{
-    "Application": {
-        "Applicant": [
-            {
-            "Name":"Shubham",
-            "Salary" : 10000
-            
-            }
-        ]
-    }
-} 
-"""
-
-xml_parser = XmlParser()
-json_parser = JsonParser()
 
 
-mpp = json_parser.from_string(data, Mpp)
-mpp.reference = "success"
+@dataclass
+class Applicant:
+    name: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "Name",
+            "type": "Element",
+            "namespace": "",
+            "required": True,
+        },
+    )
+    dob: Optional[int] = field(
+        default=None,
+        metadata={
+            "name": "DOB",
+            "type": "Element",
+            "namespace": "",
+            "required": True,
+        },
+    )
+    salary: Optional[float] = field(
+        default=None,
+        metadata={
+            "name": "Salary",
+            "type": "Element",
+            "namespace": "",
+            "required": True,
+        },
+    )
 
-# if mpp.application.array_of_applicant[0].applicant.name.upper() == "SHUBHAM":
-mpp.application.applicant[0].salary = 2 * mpp.application.applicant[0].salary;
 
-mpp.application.application_number = 123
-print(mpp)
+@dataclass
+class Result:
+    rate: Optional[float] = field(
+        default=None,
+        metadata={
+            "name": "Rate",
+            "type": "Element",
+            "namespace": "",
+            "required": True,
+        },
+    )
+    reference: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+            "namespace": "",
+            "required": True,
+        },
+    )
 
 
+@dataclass
+class Application:
+    application_number: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "Application_Number",
+            "type": "Element",
+            "namespace": "",
+            "required": True,
+        },
+    )
+    applicant: list[Applicant] = field(
+        default_factory=list,
+        metadata={
+            "name": "Applicant",
+            "type": "Element",
+            "namespace": "",
+            "min_occurs": 1,
+        },
+    )
+
+
+@dataclass
+class Mpp:
+    application: Optional[Application] = field(
+        default=None,
+        metadata={
+            "name": "Application",
+            "type": "Element",
+            "namespace": "",
+            "required": True,
+        },
+    )
+    result: Optional[Result] = field(
+        default=None,
+        metadata={
+            "name": "Result",
+            "type": "Element",
+            "namespace": "",
+            "required": True,
+        },
+    )
