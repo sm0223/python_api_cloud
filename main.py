@@ -25,7 +25,7 @@ def hello():
         'message': 'Hello from Flask on Google Cloud Functions!',
         'status': 'success',
         'endpoints': {
-            'GET /': 'This endpoint',
+            'GET /': 'This endpoint testing',
             'POST /bre033': 'Mortgage Pricing',
         }
     })
